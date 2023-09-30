@@ -39,9 +39,11 @@ Write-Host "npm outdated start (should be nothing if latest):"
 npm outdated
 Write-Host "npm outdated end:"
 
+Set-Location ..
 Write-Host "CREATE NEXT.JS APP..."
 npx create-next-app@$nextVersion $newAppName --app --js --tailwind --eslint --src-dir --import-alias "@/*"
 if (-not $?) {throw "FAILED TO CREATE NEXT.JS APP"}
+Set-Location .\$newAppName
 
 # Define Amplify JSON as a PowerShell hashtable
 $amplifyJson = @{
@@ -49,10 +51,8 @@ $amplifyJson = @{
 	envName = "dev"
 	defaultEditor = "code"
 }
-
 # Convert the Amplify JSON hashtable to a valid JSON string
 $amplify = $amplifyJson | ConvertTo-Json
-
 # Define Frontend JSON as a PowerShell hashtable
 $frontendJson = @{
 	frontend = "javascript"
@@ -64,10 +64,8 @@ $frontendJson = @{
 			StartCommand = "npm run-script start"
 	}
 }
-
 # Convert the Frontend JSON hashtable to a valid JSON string
 $frontend = $frontendJson | ConvertTo-Json
-
 # Define Providers JSON as a PowerShell hashtable
 $providersJson = @{
 	awscloudformation = @{
@@ -76,22 +74,71 @@ $providersJson = @{
 			profileName = $profileName
 	}
 }
-
 # Convert the Providers JSON hashtable to a valid JSON string
 $providers = $providersJson | ConvertTo-Json
-
 # Output the JSON strings for verification
 Write-Host "amplifyjson = $amplify"
 Write-Host "frontend = $frontend"
 Write-Host "providers = $providers"
-
 # Run amplify init with the JSON strings as parameters
 Write-Host "INIT AMPLIFY..."
 amplify init --amplify $amplify --frontend $frontend --providers $providers --yes
 if (-not $?) {throw "FAILED TO AMPLIFY INIT"}
 
-Set-Location ..\$currentFolder
+$addAuthJson = @{
+  version = 2
+  resourceName = "$newAppName Cognito"
+  serviceConfiguration = @{
+    serviceName = "Cognito"
+    userPoolConfiguration = @{
+      signinMethod = "EMAIL"
+      requiredSignupAttributes = @("EMAIL")
+      userPoolName = "$newAppName User Pool"
+      userPoolGroups = @(
+        @{
+          groupName = "internal"
+        },
+        @{
+          groupName = "partner"
+        },
+        @{
+          groupName = "host"
+        },
+        @{
+          groupName = "guest"
+        }
+      )
+			refreshTokenPeriod = 60  # Refresh tokens are valid for 60 days
+    }
+		includeIdentityPool = $true
+	}
+}
+
+$addAuth = $addAuthJson | ConvertTo-Json
+Write-Host "Add AUTH..."
+# Run amplify add auth with the JSON string as a parameter
+$addAuth | amplify add auth --headless
+if (-not $?) {throw "FAILED TO AMPLIFY ADD AUTH"}
+
 throw "end of script"
+
+
+
+# Define the path to your newHeadlessApi.addapi.json file
+$apiConfigFile = "path\to\newHeadlessApi.addapi.json"  # Replace with the actual path
+# Read the contents of the JSON file and format it as a JSON string
+$apiConfigJson = Get-Content $apiConfigFile | ConvertTo-Json -Compress
+Write-Host "Add API..."
+# Run amplify add api with the JSON string as a parameter
+amplify add api --headless --yes --config $apiConfigJson
+if (-not $?) {throw "FAILED TO AMPLIFY INIT"}
+
+
+Write-Host "AMPLIFY PUSH..."
+amplify push 
+if (-not $?) {throw "FAILED TO AMPLIFY PUSH"}
+
+Set-Location ..\$currentFolder
 
 #TODO:
 #Copy schema.graphql across
