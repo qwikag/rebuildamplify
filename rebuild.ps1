@@ -107,11 +107,11 @@ $addAuthJson = @{
         @{
           groupName = "guest"
         }
-      )
-			refreshTokenPeriod = 60  # Refresh tokens are valid for 60 days
+			)
+      refreshTokenPeriod = 60  # Refresh tokens are valid for 60 days
     }
-		includeIdentityPool = $true
-	}
+    includeIdentityPool = $true
+  }
 }
 
 $addAuth = $addAuthJson | ConvertTo-Json
