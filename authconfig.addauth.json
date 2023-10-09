@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "resourceName": "test1Cognito",
+  "serviceConfiguration": {
+    "serviceName": "Cognito",
+    "apiName": "test1API",
+    "includeIdentityPool": true,
+    "userPoolConfiguration": {
+      "signinMethod": "EMAIL",
+      "requiredSignupAttributes": ["EMAIL"],
+      "userPoolName": "test1UserPool",
+      "userPoolGroups": [
+        {
+          "groupName": "internal"
+        },
+        {
+          "groupName": "partner"
+        },
+        {
+          "groupName": "host"
+        },
+        {
+          "groupName": "guest"
+        }
+      ]
+    }
+  }
+}
