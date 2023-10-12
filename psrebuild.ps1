@@ -157,9 +157,9 @@ if ($exists) {
 
   Read-Host -Prompt "Hit your F5 macro to update amplify Auth with Cognito triggers. . ."
   Read-Host -Prompt "or hit enter to manually add your Cognito triggers. . ."
-  # F5 equals these key strokes  e\/\/eeee\/eeee""eee""eee\/ee\/\/\/\/se\/sene
+  # F5 equals these key strokes  e\/\/eeee\/eeeeeee""eee\/ee\/\/\/\/se\/sene
   # \/ = down arrow
-  # s = spave
+  # s = space
   # e = enter
   # n = n
   # "" = string of text "Your Verification Code {####}" and "365" rspectively
